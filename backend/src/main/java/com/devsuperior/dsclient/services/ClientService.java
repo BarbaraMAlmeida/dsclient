@@ -4,12 +4,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.devsuperior.dscatalog.dto.CategoryDTO;
+import com.devsuperior.dscatalog.entities.Category;
+import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dsclient.dto.ClientDTO;
 import com.devsuperior.dsclient.entities.Client;
 import com.devsuperior.dsclient.repository.ClientRepository;
@@ -61,5 +66,23 @@ public class ClientService {
 			throw new DatabaseException("Integrity violation");
 		}
 		
+	}
+
+	@Transactional
+	public ClientDTO update(long id, ClientDTO dto) {
+		try {
+			Client entity = repository.getOne(id);
+			entity.setName(dto.getName());
+			entity.setCpf(dto.getCpf());
+			entity.setBirthDate(dto.getBirthDate());
+			entity.setChildren(dto.getChildren());
+			entity.setIncome(dto.getIncome());
+			entity = repository.save(entity);
+			
+			return new ClientDTO(entity);
+		}
+		catch(EntityNotFoundException e){
+			throw new ClientNotFoundException("Id not found" + id);
+		}
 	}  
 } 
